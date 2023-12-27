@@ -1,14 +1,14 @@
 #输出被巡检的数据库信息（目前只支持MySQL）
 dbinfo:
   dirverName: mysql                                             #指定数据库类型
-  username: pcms                                                #指定连接数据库的用户名
-  password: "pcms@123"                                          #指定连接数据库的密码
-  host: 172.16.50.161                                           #指定连接数据库的ip地址
+  host: 172.22.0.70                                             #指定连接数据库的ip地址
   port: 3306                                                    #指定连接数据库的port
+  username: root                                                #指定连接数据库的用户名
+  password: "brwFoGVhW16$3Ee2"                                  #指定连接数据库的密码
   database: information_schema                                  #指定默认连接的数据库，非必选项，
-  charset: utf8                                                 #指定连接数据库时的字符集
+  charset: utf8mb4                                              #指定连接数据库时的字符集utf8\utf8mb4
   dbConnIdleTime: 100                                           #指定会话的空闲时间
-  maxIdleConns: 100                                             #指定最大的空闲连接数
+  maxIdleConns: 100  
 
 #输出日志信息
 logs:
@@ -178,7 +178,7 @@ inspectionConfInput:
       subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
     - checkconfiguration: tableAutoIncrement                    #检测自增主键数据类型(请勿修改)
       checkThreshold: bigint                                    #自增主键非bigint类型
-      subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
+      subCheckSwitch: false                                      #该检测项的开关，为true则检测该项，为false则不检测该项
     - checkconfiguration: tableBigColumns                       #检测表是否存在大列类型(请勿修改)
       checkThreshold: text,timestamp,blob                       #表中是否存在大字段类型（text,timestamp,blob）
       subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
