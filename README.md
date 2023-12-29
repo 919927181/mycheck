@@ -1,6 +1,7 @@
 # MySQL 实例深度巡检 #
 
-  本项目 Fork From https://github.com/ywlianghang/mycheck ,在此，对该开源作者表示感谢
+  本项目 Fork From https://github.com/ywlianghang/mycheck , 在此，对该开源作者表示由衷的感谢，若能联系上，到时进行合并。
+
 ----------
 ## Tools Introductory ##
 
@@ -86,7 +87,7 @@
 
     3）mycheck后续功能更新
     （1）增加数据库环境检查项
-    （2）新添巡检结果输出方式，html格式【2023-12-29 v1.1版本已完成，by @wechat: Sd-LiYanJing】
+    （2）新添巡检结果输出方式，html格式【 v1.1版本 已完成，By @wechat: Sd-LiYanJing】
     （3）其他待续
 
 --------
@@ -147,8 +148,14 @@
     mycheck needs go version > 1.12 for go mod
 
     shell> git clone https://github.com/ywlianghang/mycheck.git
-    shell> cd main
+
+    执行运行命令
+    shell> go run main.go --config mycheck.yaml
+
+    执行编译命令
     shell> go build -o mycheck main.go
+
+    赋予可执行权限
     shell> chmod +x mycheck
     shell> mv mycheck /usr/bin
 
