@@ -1,4 +1,4 @@
-package PDF
+package HTML
 
 import (
 	pub "DepthInspection/api/PublicClass"
@@ -98,14 +98,14 @@ func (out *OutputWayStruct) tmpcc(checkRulest []map[string]string) []string {
 			tmpThreshold = checkRulest[i]["threshold"]
 			tmpErrorCode = checkRulest[i]["errorCode"]
 			tmpeq++
-			if tmpeq > 1 {
+			if tmpeq > 10 {
 				tmpAbnormalInformation = fmt.Sprintf("%s 等", tmpAbnormalInformation)
 				break
 			}
 			if tmpAbnormalInformation != "" {
-				tmpAbnormalInformation = fmt.Sprintf("%s,%s", tmpAbnormalInformation, checkRulest[i]["currentValue"])
+				tmpAbnormalInformation = fmt.Sprintf("%s, %s", tmpAbnormalInformation, checkRulest[i]["currentValue"])
 			} else {
-				tmpAbnormalInformation = fmt.Sprintf("%s", checkRulest[i]["currentValue"])
+				tmpAbnormalInformation = checkRulest[i]["currentValue"]
 			}
 		}
 	}

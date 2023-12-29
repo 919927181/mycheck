@@ -2,19 +2,19 @@
 dbinfo:
   dirverName: mysql                                             #指定数据库类型
   host: 172.22.0.70                                             #指定连接数据库的ip地址
-  port: 3306                                                    #指定连接数据库的port
+  port: 3306                                                   #指定连接数据库的port
   username: root                                                #指定连接数据库的用户名
-  password: "brwFoGVhW16$3Ee2"                                  #指定连接数据库的密码
+  password: "bawFo1VtW76$3Ee1"                                  #指定连接数据库的密码
   database: information_schema                                  #指定默认连接的数据库，非必选项，
   charset: utf8mb4                                              #指定连接数据库时的字符集utf8\utf8mb4
   dbConnIdleTime: 100                                           #指定会话的空闲时间
-  maxIdleConns: 100  
+  maxIdleConns: 100                                             #指定最大的空闲连接数
 
 #输出日志信息
 logs:
   loglevel: error                                               #定义日志输出级别
   outputFile:                                                   #日志输出设置
-    logfile: .\log\aab                                          #日志路径，可以为绝对路径也可以为相对路径。例如：D:\\goProject\\DepthInspection\\log\\aab
+    logfile: .\log\mycheck.log                                  #日志路径，可以为绝对路径也可以为相对路径。例如：D:\\goProject\\DepthInspection\\log\\aab
     logMaxAge: 100                                              #日志最大生存时间
     isConsole: true                                             #针对输出日志信息中的日志级别是否有颜色
     rotationTime: 100                                           #日志轮转时间
@@ -22,11 +22,11 @@ logs:
 
 #巡检结果集输出
 resultOutput:
-  outputWay: pdf                                                #将结果集汇总输出到pdf中，并产生可视化报告
-  outputPath: .\                                                #生成的pdf的路径，全路径或当前绝对路径
+  outputWay: "html"                                              #将结果集汇总输出到pdf或html中，并产生可视化报告，若设置为空，则输出pdf和html报告。
+  outputPath: .\                                                #生成报告文件的路径，全路径或当前绝对路径
   outputFile: MySQL DepthInspection Result Report.pdf           #输出结果的pdf文件名
-  inspectionPersonnel: golang                                   #在pdf报告中会在巡检人员中显示该值
-  inspectionLevel: 重保巡检                                       #在pdf报告中会在巡检等级中显示该值
+  inspectionPersonnel: golang                                   #在报告中会在巡检人员中显示该值
+  inspectionLevel: 重保巡检                                      #在报告中会在巡检等级中显示该值
 
 #巡检项开关设置
 inspectionConfSwitch:
@@ -36,13 +36,13 @@ inspectionConfSwitch:
     databasePerformanceSwitch: true                             #是否巡检数据库性能，值为true或false
     databaseBaselineSwitch: true                                #是否巡检数据库基线，值为true或false
     databaseSecuritySwitch: true                                #是否巡检数据库安全，值为true或false
-    databaseSpaceSwitch: true                                   #是否巡检数据库空间，值为true或false
+    databaseSpaceSwitch: false                                  #是否巡检数据库空间，值为true或false
 
 #巡检项配置文件定义
 inspectionConfInput:
   databaseEnvironment:                                          #是否巡检数据库环境，值为true 或 false
   databaseConfiguration:                                        #是否巡检数据库配置（此选项可根据自己的环境进项参数增加，按照格式对应就可以）
-    - checkconfiguration: super_read_only                       #检测MySQL配置参数super_read_only
+    - checkconfiguration: super_read_only                       #检测MySQL配置参数super_read_only，on表示开，off表示关
       checkThreshold: off                                       #检测阈值，如果当前值部位off，则会视为异常
       subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
     - checkconfiguration: read_only
@@ -53,18 +53,21 @@ inspectionConfInput:
       subCheckSwitch: true
     - checkconfiguration: binlog_format
       checkThreshold: row
-      subCheckSwitch: true
+      subCheckSwitch: false
     - checkconfiguration: character_set_server
-      checkThreshold: utf8
+      checkThreshold: utf8mb4
       subCheckSwitch: true
     - checkconfiguration: default_authentication_plugin
       checkThreshold: mysql_native_password
-      subCheckSwitch: true
+      subCheckSwitch: false
     - checkconfiguration: default_storage_engine
       checkThreshold: innodb
       subCheckSwitch: true
     - checkconfiguration: default_tmp_storage_engine
       checkThreshold: innodb
+      subCheckSwitch: true
+    - checkconfiguration: sync_binlog            #sync_binlog、innodb_flush_log_at_trx_commit双一检查
+      checkThreshold: 1
       subCheckSwitch: true
     - checkconfiguration: innodb_flush_log_at_trx_commit
       checkThreshold: 1
@@ -80,15 +83,12 @@ inspectionConfInput:
       subCheckSwitch: true
     - checkconfiguration: query_cache_type
       checkThreshold: off
-      subCheckSwitch: true
+      subCheckSwitch: false
     - checkconfiguration: relay_log_purge
       checkThreshold: on
       subCheckSwitch: true
     - checkconfiguration: relay_log_recovery
       checkThreshold: on
-      subCheckSwitch: true
-    - checkconfiguration: sync_binlog
-      checkThreshold: 1
       subCheckSwitch: true
     - checkconfiguration: system_time_zone
       checkThreshold: CST
@@ -178,7 +178,7 @@ inspectionConfInput:
       subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
     - checkconfiguration: tableAutoIncrement                    #检测自增主键数据类型(请勿修改)
       checkThreshold: bigint                                    #自增主键非bigint类型
-      subCheckSwitch: false                                      #该检测项的开关，为true则检测该项，为false则不检测该项
+      subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
     - checkconfiguration: tableBigColumns                       #检测表是否存在大列类型(请勿修改)
       checkThreshold: text,timestamp,blob                       #表中是否存在大字段类型（text,timestamp,blob）
       subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项

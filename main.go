@@ -2,13 +2,16 @@ package main
 
 import (
 	"DepthInspection/InspectionItem"
+	"DepthInspection/ResultOutput/HTML"
 	"DepthInspection/ResultOutput/PDF"
 	"DepthInspection/api/PublicClass"
 	"DepthInspection/flag"
+	"strings"
 	"time"
 )
 
-var OutputPdf PDF.OutPutWayInter =  &PDF.OutputWayStruct{}
+var OutputPdf PDF.OutPutWayInter = &PDF.OutputWayStruct{}
+var OutputHtml HTML.OutPutWayInter = &HTML.OutputWayStruct{}
 
 func main() {
 	//配置文件初始化
@@ -29,6 +32,16 @@ func main() {
 	c.DatabasePerformanceStatusCheck()
 	c.DatabasePerformanceTableIndexCheck()
 	PublicClass.CheckEndTime = time.Now().Format("2006-01-02 15:04:05")
-	PublicClass.CheckTimeConsuming,_ = PublicClass.Strea.GetTimeSecondsArr(PublicClass.CheckBeginTime,PublicClass.CheckEndTime)
-	OutputPdf.OutPdf()
+	PublicClass.CheckTimeConsuming, _ = PublicClass.Strea.GetTimeSecondsArr(PublicClass.CheckBeginTime, PublicClass.CheckEndTime)
+
+	outPutFileType := strings.TrimSpace(PublicClass.ResultOutput.OutputWay)
+	if outPutFileType == "" {
+		OutputPdf.OutPdf()
+		OutputHtml.OutHtml()
+	} else if outPutFileType == "pdf" {
+		OutputPdf.OutPdf()
+	} else {
+		OutputHtml.OutHtml()
+	}
+
 }
