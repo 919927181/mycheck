@@ -1,7 +1,8 @@
 # MySQL 实例深度巡检 #
 
+  本项目 Fork From https://github.com/ywlianghang/mycheck ,在此，对该开源作者表示感谢
 ----------
-##  Introductory ##
+## Tools Introductory ##
 
      您是否遇到过如下困扰：
        1）某一天业务反馈插入数据失败，经过排查自增id的数据类型溢出了，严重影响业务，而表数据量又很大，操作时间长，导致领导层震荡，小兵遭殃
@@ -85,18 +86,26 @@
 
     3）mycheck后续功能更新
     （1）增加数据库环境检查项
-    （2）新添巡检结果输出方式，html格式
+    （2）新添巡检结果输出方式，html格式【2023-12-29 v1.1版本已完成，by @wechat: Sd-LiYanJing】
     （3）其他待续
 
-    4）问题反馈
-      如果在使用中有什么问题，或者有什么好的建议及想法，欢迎随时发送到邮箱ywlianghang@gmail.com或ywlianghang@163.com或xing.liang@greatdb.com
+--------
+
+## 问题反馈 ##
+      如果在使用中有什么问题，或者有什么好的建议及想法，欢迎联系我们。
+	  
+	  - 原开源作者：发送到邮箱ywlianghang@gmail.com或ywlianghang@163.com或xing.liang@greatdb.com
+	  
+	  - 泰山李工，@wechat: Sd-LiYanJing
+	  
+	  
       注：如果新添巡检功能或巡检项，请写出巡检方法，巡检阈值及巡检意义
 
 ------
 
 ## Download  ##
 
-   你可以从 [这里](https://github.com/ywlianghang/mycheck/releases) 下载二进制可执行文件，我已经在ubuntu、centos、redhat、windows x64下测试过
+   你可以从 [这里](https://github.com/919927181/mycheck/releases) 下载二进制可执行文件，我已经在ubuntu、centos、redhat、windows x64下测试过
 
 -----
 ## Usage  ##
@@ -152,3 +161,5 @@
 ## Author ##
 
 lianghang  ywlianghang@gmail.com
+
+泰山李工，@wechat: Sd-LiYanJing
