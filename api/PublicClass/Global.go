@@ -47,6 +47,7 @@ type BaselineCheckTablesDesignResultStruct struct {
 	TableEngine       []map[string]string
 	TableForeign      []map[string]string
 	TableNoPrimaryKey []map[string]string
+	TableRowFormat    []map[string]string
 }
 type BaselineCheckColumnDesignResultStruct struct {
 	TableAutoIncrement []map[string]string

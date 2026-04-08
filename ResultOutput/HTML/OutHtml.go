@@ -28,7 +28,7 @@ const temp = `
             color: #333;
             background-color: #f5f5f5;
         }
-		
+
         h2 {
             font-weight: bold;
             font-size: 28px;
@@ -109,10 +109,10 @@ const temp = `
 		.title-lever1 {
             font-size: 14px;
 			font-weight: bold;
-            text-align: left;			
+            text-align: left;
 			width:210mm;
 			height:32px;
-			display: flex;align-items: center; 
+			display: flex;align-items: center;
             margin: auto auto 5px;
 			background-color: #e5eefd;
         }
@@ -122,13 +122,13 @@ const temp = `
             color:#0074a3;
             text-align: left;
 			width:210mm;
-			display: flex;align-items: center; 
+			display: flex;align-items: center;
             margin: auto auto 5px;
             margin-top: 10px;
         }
 		.panel-responsive {
             font-size: 12px;
-            text-align: left;			
+            text-align: left;
 			width:208mm;
             margin: auto auto 0px;
 			padding-left:10px;padding-top:10px;
@@ -163,8 +163,8 @@ const temp = `
                         <tbody>
                                 {{range .resultSummary}}
                                 <tr>
-                                    <td class="text-center">{{ .Id}}</td>        
-                                    <td class="text-center">{{ .Name}}</td>        
+                                    <td class="text-center">{{ .Id}}</td>
+                                    <td class="text-center">{{ .Name}}</td>
                                     <td class="text-center">{{ .Counts}}</td>
                                     <td class="text-center">{{ .NormalCounts}}</td>
                                     <td class="text-center">{{ .AbnormalCounts}}</td>
@@ -264,7 +264,7 @@ func (out *OutputWayStruct) OutHtml() {
 			"openFileUsageRate", "openTableCacheUsageRate", "openTableCacheOverflowsUsageRate", "selectScanUsageRate", "selectfullJoinScanUsageRate",
 			"tableAutoPrimaryKeyUsageRate", "tableRows", "diskFragmentationRate", "bigTable", "coldTable"}},
 		{3, "数据库基线", []string{"tableCharset", "tableEngine", "tableForeign", "tableNoPrimaryKey", "tableAutoIncrement",
-			"tableBigColumns", "indexColumnIsNull", "indexColumnType", "tableIncludeRepeatIndex", "tableProcedureFunc", "tableTrigger"}},
+			"tableBigColumns", "indexColumnIsNull", "indexColumnType", "tableIncludeRepeatIndex", "tableProcedureFunc", "tableTrigger", "tableRowFormat"}},
 		{4, "数据库安全", []string{"anonymousUsers", "emptyPasswordUser", "rootUserRemoteLogin", "normalUserConnectionUnlimited",
 			"userPasswordSame", "normalUserDatabaseAllPrivilages", "normalUserSuperPrivilages", "databasePort"}},
 	}

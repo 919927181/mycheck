@@ -6,74 +6,73 @@ import (
 	"strings"
 )
 
-//配置参数检查功能
-func DatabaseConfigCheck(confParameterList map[string]string)  {
+// 配置参数检查功能
+func DatabaseConfigCheck(confParameterList map[string]string) {
 	pub.Loggs.Info("Begin to check that the database configuration parameters are properly configured")
-	var configVariablesName ,configValue string
-	for i := range confParameterList{
+	var configVariablesName, configValue string
+	for i := range confParameterList {
 		configVariablesName = i
 		configValue = confParameterList[i]
-		pub.Loggs.Debug("Start checking database parameters ",configVariablesName)
-		a,ok := pub.GlobalVariables[configVariablesName]
+		pub.Loggs.Debug("Start checking database parameters ", configVariablesName)
+		a, ok := pub.GlobalVariables[configVariablesName]
 		if !ok {
 			pub.Loggs.Error("The current data configuration parameter does not exist. Please check if it is incorrectly typed")
 		}
-		d  := make(map[string]string)
+		d := make(map[string]string)
 		d["configVariableName"] = configVariablesName
-		d["configVariable"] = a   //当前值
+		d["configVariable"] = a        //当前值
 		d["configValue"] = configValue //建议值
 		d["checkStatus"] = "normal"    //正常
 		d["checkType"] = "configParameter"
 		d["errorCode"] = "CF1-01"
-		if !strings.EqualFold(a,configValue) {
-			d["checkStatus"] = "abnormal"    //异常
+		if !strings.EqualFold(a, configValue) {
+			d["checkStatus"] = "abnormal" //异常
 			d["threshold"] = configValue
-			d["currentValue"] = fmt.Sprintf("%s=%s",configVariablesName,a)
-			errorStrinfo := fmt.Sprintf(" CF1-01 The current database configuration is \"%s\" Not meeting reservation requirements! The current value of \"%s\" You are advised to set it to \"%s\"",configVariablesName,a,configValue)
+			d["currentValue"] = fmt.Sprintf("%s=%s", configVariablesName, a)
+			errorStrinfo := fmt.Sprintf(" CF1-01 The current database configuration is \"%s\" Not meeting reservation requirements! The current value of \"%s\" You are advised to set it to \"%s\"", configVariablesName, a, configValue)
 			pub.Loggs.Error(errorStrinfo)
 		}
-		pub.InspectionResult.DatabaseConfigCheck.ConfigParameter = append(pub.InspectionResult.DatabaseConfigCheck.ConfigParameter,d)
+		pub.InspectionResult.DatabaseConfigCheck.ConfigParameter = append(pub.InspectionResult.DatabaseConfigCheck.ConfigParameter, d)
 	}
 
 	pub.Loggs.Info("The check database configuration parameters are complete")
 }
 
-
-
 type DatabaseBaselineCheckStruct struct {
-	strSql string
+	strSql            string
 	ignoreTableSchema string
 }
 type TableDesignComplianceStruct struct {
 	DatabaseName interface{} `json: "databaseName"`
-	TableName interface{} `json: "tableName"`
-	Engine interface{}  `json: "engine"`
-	Charset interface{} `json: "charset"`
+	TableName    interface{} `json: "tableName"`
+	Engine       interface{} `json: "engine"`
+	Charset      interface{} `json: "charset"`
 }
 
 func newMap(source map[string]string) map[string]string {
 	var n = make(map[string]string)
-	for k,v := range source {
-		n[k]=v
+	for k, v := range source {
+		n[k] = v
 	}
 	return n
 }
-//数据库的基线检查功能--检查表设计合规性
-//检查表字符集是否为utf8
+
+// 数据库的基线检查功能--检查表设计合规性
+// 检查表字符集是否为utf8
 func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckTablesDesign() {
 	//表字符集检查 ~ 	表引擎检查
 	pub.Loggs.Info("Begin a baseline check to check database table design compliance")
 	var tableCharset string
 	//字符集处理,生成字符集对应表
-	var tmpCharsetCorrespondingTable = make(map[string]string)   //字符集对应表
+	var tmpCharsetCorrespondingTable = make(map[string]string) //字符集对应表
 	informationSchemaCollationsData := pub.InformationSchemaCollationsData
 	for k := range informationSchemaCollationsData {
 		ac := informationSchemaCollationsData[k]["COLLATION_NAME"].(string)
 		ad := informationSchemaCollationsData[k]["CHARACTER_SET_NAME"].(string)
 		tmpCharsetCorrespondingTable[ac] = ad
 	}
-	for ki,vi := range pub.BaselineCanCheck {
-		if strings.EqualFold(ki, "tableCharset") || strings.EqualFold(ki, "tableEngine"){
+	for ki, vi := range pub.BaselineCanCheck {
+		if strings.EqualFold(ki, "tableCharset") || strings.EqualFold(ki, "tableEngine") {
 			for i := range pub.InformationSchemaTablesData {
 				ist := pub.InformationSchemaTablesData[i]
 				var d = make(map[string]string)
@@ -102,7 +101,7 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckTablesDesign() {
 						pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableCharset = append(pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableCharset, d)
 					}
 				}
-				//检查引擎不是innodb的
+				//检查引擎不是innodb的表
 				if strings.EqualFold(ki, "tableEngine") {
 					m := newMap(d)
 					m["checkType"] = "tableEngine"
@@ -120,6 +119,26 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckTablesDesign() {
 						pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableEngine = append(pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableEngine, m)
 					}
 				}
+
+				//检查表的行格式不是Dynamic的表
+				if strings.EqualFold(ki, "rowFormat") {
+					m := newMap(d)
+					m["checkType"] = "rowFormat"
+					if pub.InformationSchemaTablesData[i]["ROW_FORMAT"] != nil && !strings.EqualFold(pub.InformationSchemaTablesData[i]["ROW_FORMAT"].(string), "Dynamic") {
+						m["checkStatus"] = "abnormal"
+						m["threshold"] = fmt.Sprintf("非%s", vi)
+						m["errorCode"] = "BL1-TC02"
+						m["currentValue"] = fmt.Sprintf("%s.%s", ist["TABLE_SCHEMA"], ist["TABLE_NAME"])
+						pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableRowFormat = append(pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableRowFormat, m)
+						pub.Loggs.Error(fmt.Sprintf(" BL1-TC02 The current table row_format set is not Dynamic. error info: Database is \"%s\" table is \"%s\" table row_format is \"%s\" ", ist["TABLE_SCHEMA"], ist["TABLE_NAME"], ist["ROW_FORMAT"]))
+					}
+					if ist["ROW_FORMAT"] != nil && strings.EqualFold(ist["ROW_FORMAT"].(string), "Dynamic") {
+						m["checkStatus"] = "normal"
+						m["currentValue"] = fmt.Sprintf("%s.%s", ist["TABLE_SCHEMA"], ist["TABLE_NAME"])
+						pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableRowFormat = append(pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableRowFormat, m)
+					}
+				}
+
 			}
 		}
 		//检查表是否使用外键
@@ -132,7 +151,7 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckTablesDesign() {
 				d["checkType"] = "tableForeign"
 				if iskl["REFERENCED_TABLE_NAME"] != nil && iskl["REFERENCED_COLUMN_NAME"] != nil {
 					d["checkStatus"] = "abnormal" //异常
-					d["threshold"] = fmt.Sprintf("%s",vi)
+					d["threshold"] = fmt.Sprintf("%s", vi)
 					d["errorCode"] = "BL1-TC03"
 					d["currentValue"] = fmt.Sprintf("%s.%s", iskl["databaseName"], iskl["tableName"])
 					d["columnName"] = iskl["columnName"].(string)
@@ -164,7 +183,7 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckTablesDesign() {
 				} else {
 					if ke != icd["TABLE_SCHEMA"].(string) || vl != icd["TABLE_NAME"].(string) {
 						dd["checkStatus"] = "abnormal" //异常
-						dd["threshold"] = fmt.Sprintf("%s",vi)
+						dd["threshold"] = fmt.Sprintf("%s", vi)
 						dd["errorCode"] = "BL1-TC04"
 						dd["currentValue"] = fmt.Sprintf("%s.%s", icd["TABLE_SCHEMA"], icd["TABLE_NAME"])
 						pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableNoPrimaryKey = append(pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableNoPrimaryKey, dd)
@@ -178,8 +197,8 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckTablesDesign() {
 	}
 }
 
-//列设计合规性
-func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckColumnsDesign(){
+// 列设计合规性
+func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckColumnsDesign() {
 	pub.Loggs.Info("Begin a baseline check to check database columns design compliance")
 	for i := range pub.InformationSchemaColumnsData {
 		icd := pub.InformationSchemaColumnsData[i]
@@ -188,33 +207,33 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckColumnsDesign(){
 		d["tableName"] = icd["TABLE_NAME"].(string)
 		d["columnName"] = icd["COLUMN_NAME"].(string)
 		//主键自增列是否为bigint
-		if vi,ok := pub.BaselineCanCheck["tableautoincrement"];ok && pub.InformationSchemaColumnsData[i]["EXTRA"] == "auto_increment" {
-				if !strings.Contains(icd["COLUMN_TYPE"].(string), vi) {
-					d["checkStatus"] = "abnormal" //异常
-					d["checkType"] = "tableAutoIncrement"
-					d["threshold"] = "无自增主键"
-					d["errorCode"] = "BL2-CC01"
-					d["currentValue"] = fmt.Sprintf("%s.%s", icd["TABLE_SCHEMA"], icd["TABLE_NAME"])
-					pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableAutoIncrement = append(pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableAutoIncrement, d)
-					pub.Loggs.Error(fmt.Sprintf(" BL2-CC01 The primary key column is not of type Bigint. The information is as follows: database: \"%s\" tableName: \"%s\" columnsName: \"%s\" columnType: \"%s\".", icd["TABLE_SCHEMA"], icd["TABLE_NAME"], icd["COLUMN_NAME"], icd["COLUMN_TYPE"]))
-				} else {
-					d["checkStatus"] = "normal" //异常
-					d["checkType"] = "tableAutoIncrement"
-					pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableAutoIncrement = append(pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableAutoIncrement, d)
-				}
+		if vi, ok := pub.BaselineCanCheck["tableautoincrement"]; ok && pub.InformationSchemaColumnsData[i]["EXTRA"] == "auto_increment" {
+			if !strings.Contains(icd["COLUMN_TYPE"].(string), vi) {
+				d["checkStatus"] = "abnormal" //异常
+				d["checkType"] = "tableAutoIncrement"
+				d["threshold"] = "无自增主键"
+				d["errorCode"] = "BL2-CC01"
+				d["currentValue"] = fmt.Sprintf("%s.%s", icd["TABLE_SCHEMA"], icd["TABLE_NAME"])
+				pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableAutoIncrement = append(pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableAutoIncrement, d)
+				pub.Loggs.Error(fmt.Sprintf(" BL2-CC01 The primary key column is not of type Bigint. The information is as follows: database: \"%s\" tableName: \"%s\" columnsName: \"%s\" columnType: \"%s\".", icd["TABLE_SCHEMA"], icd["TABLE_NAME"], icd["COLUMN_NAME"], icd["COLUMN_TYPE"]))
+			} else {
+				d["checkStatus"] = "normal" //异常
+				d["checkType"] = "tableAutoIncrement"
+				pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableAutoIncrement = append(pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableAutoIncrement, d)
 			}
-		if vi,ok := pub.BaselineCanCheck["tablebigcolumns"];ok && pub.InformationSchemaColumnsData[i]["EXTRA"] != "auto_increment" {
+		}
+		if vi, ok := pub.BaselineCanCheck["tablebigcolumns"]; ok && pub.InformationSchemaColumnsData[i]["EXTRA"] != "auto_increment" {
 			//表中是否存在大字段blob、text、varchar(8099)、timestamp数据类型
 			m := newMap(d)
 			if icd["COLUMN_TYPE"] != nil {
 				ce := icd["COLUMN_TYPE"].(string)
-				if tmpIndexInt := strings.Index(ce,"(");tmpIndexInt != -1{
+				if tmpIndexInt := strings.Index(ce, "("); tmpIndexInt != -1 {
 					ce = ce[:tmpIndexInt]
 				}
-				if strings.Contains(vi,ce){
+				if strings.Contains(vi, ce) {
 					m["checkStatus"] = "abnormal" //异常
 					m["checkType"] = "tableBigColumns"
-					m["threshold"] = fmt.Sprintf("%s",vi)
+					m["threshold"] = fmt.Sprintf("%s", vi)
 					m["errorCode"] = "BL2-CC02"
 					m["currentValue"] = fmt.Sprintf("%s.%s", icd["TABLE_SCHEMA"], icd["TABLE_NAME"])
 					pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableBigColumns = append(pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableBigColumns, m)
@@ -226,13 +245,13 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckColumnsDesign(){
 				}
 			}
 		}
-			//var dd = make(map[string]string)
-			//表列数是否大于255
+		//var dd = make(map[string]string)
+		//表列数是否大于255
 		//}
 	}
 }
 
-//索引设计合规性
+// 索引设计合规性
 func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckIndexColumnDesign() {
 	pub.Loggs.Info("Begin by checking that index usage is reasonable and index column creation is standard")
 	var tmpMap = make(map[string]string)
@@ -291,7 +310,7 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckIndexColumnDesign
 			}
 		}
 	}
-	if _,okk := pub.BaselineCanCheck["tableincluderepeatindex"];okk {
+	if _, okk := pub.BaselineCanCheck["tableincluderepeatindex"]; okk {
 		//利用map合并联合索引列
 		var tmpIndexMargeMap = make(map[string]string)
 		for k := range pub.InformationSchemaStatistics {
@@ -356,19 +375,20 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckIndexColumnDesign
 		}
 	}
 }
-//存储过程、存储函数、触发器检查限制
-func(baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckProcedureTriggerDesign(){
+
+// 存储过程、存储函数、触发器检查限制
+func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckProcedureTriggerDesign() {
 	pub.Loggs.Info("Begin a baseline check to checking whether the database uses stored procedures, stored functions, or triggers")
 	//var c []map[string]string
-	if vi,okk := pub.BaselineCanCheck["tableprocedurefunctrigger"];okk {
+	if vi, okk := pub.BaselineCanCheck["tableprocedurefunctrigger"]; okk {
 		for i := range pub.InformationSchemaRoutines {
 			cc := pub.InformationSchemaRoutines[i]
 			var d = make(map[string]string)
 			d["database"] = cc["ROUTINE_SCHEMA"].(string)
-			if strings.Contains(strings.ToLower(vi),strings.ToLower(cc["ROUTINE_TYPE"].(string))) {
+			if strings.Contains(strings.ToLower(vi), strings.ToLower(cc["ROUTINE_TYPE"].(string))) {
 				d["checkStatus"] = "abnormal" //异常状态
 				d["checkType"] = "tableProcedureFunc"
-				d["threshold"] = fmt.Sprintf("%s",strings.ToLower(cc["ROUTINE_TYPE"].(string)))
+				d["threshold"] = fmt.Sprintf("%s", strings.ToLower(cc["ROUTINE_TYPE"].(string)))
 				d["errorCode"] = "BL4-PT01"
 				d["currentValue"] = fmt.Sprintf("%s.%s", cc["ROUTINE_SCHEMA"], cc["ROUTINE_NAME"])
 				pub.InspectionResult.DatabaseBaselineCheck.ProcedureTriggerDesign.TableProcedure = append(pub.InspectionResult.DatabaseBaselineCheck.ProcedureTriggerDesign.TableProcedure, d)
@@ -380,10 +400,10 @@ func(baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckProcedureTriggerDe
 			var d = make(map[string]string)
 			dd := pub.InformationSchemaTriggers[i]
 			d["database"] = dd["TRIGGER_SCHEMA"].(string)
-			if strings.Contains(strings.ToLower(vi),"trigger") && dd["TRIGGER_NAME"] != nil {
+			if strings.Contains(strings.ToLower(vi), "trigger") && dd["TRIGGER_NAME"] != nil {
 				d["checkStatus"] = "abnormal" //异常状态
 				d["checkType"] = "tableTrigger"
-				d["threshold"] = fmt.Sprintf("%s","trigger")
+				d["threshold"] = fmt.Sprintf("%s", "trigger")
 				d["errorCode"] = "BL4-PT02"
 				d["currentValue"] = fmt.Sprintf("%s.%s", dd["TRIGGER_SCHEMA"], dd["TRIGGER_NAME"])
 				pub.InspectionResult.DatabaseBaselineCheck.ProcedureTriggerDesign.TableTrigger = append(pub.InspectionResult.DatabaseBaselineCheck.ProcedureTriggerDesign.TableTrigger, d)

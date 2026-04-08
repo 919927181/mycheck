@@ -4,7 +4,7 @@ dbinfo:
   host: 172.22.0.70                                             #指定连接数据库的ip地址
   port: 3306                                                   #指定连接数据库的port
   username: root                                                #指定连接数据库的用户名
-  password: "bawFo1VtW76$3Ee1"                                  #指定连接数据库的密码
+  password: "bbwFoGVtW86$3Ee2"                                  #指定连接数据库的密码
   database: information_schema                                  #指定默认连接的数据库，非必选项，
   charset: utf8mb4                                              #指定连接数据库时的字符集utf8\utf8mb4
   dbConnIdleTime: 100                                           #指定会话的空闲时间
@@ -111,6 +111,12 @@ inspectionConfInput:
     - checkconfiguration: unique_checks
       checkThreshold: on
       subCheckSwitch: true
+    - checkconfiguration: gtid_mode
+      checkThreshold: on
+      subCheckSwitch: true
+    - checkconfiguration: enforce_gtid_consistency
+      checkThreshold: on
+      subCheckSwitch: true
 
   databasePerformance:                                          #是否巡检数据库性能
     - checkconfiguration: binlogDiskUsageRate                   #检测binlog磁盘利用率(请勿修改)
@@ -192,6 +198,9 @@ inspectionConfInput:
       subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
     - checkconfiguration: tableProcedureFuncTrigger             #检测存储过程、函数、触发器使用情况(请勿修改)
       checkThreshold: procedure,function,trigger                #判断是否使用存储过程、存储函数、触发器
+      subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
+    - checkconfiguration: rowFormat                             #检查表的行格式不是Dynamic的表(请勿修改)
+      checkThreshold: Dynamic                                   #是不是Dynamic的表
       subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
 
   databaseSecurity:                                             #是否巡检数据库安全，值为true或false

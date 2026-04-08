@@ -53,6 +53,7 @@ func tmpInit() {
 	abcd["configParameter"] = pub.InspectionResult.DatabaseConfigCheck.ConfigParameter
 	abcd["tableCharset"] = pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableCharset
 	abcd["tableEngine"] = pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableEngine
+	abcd["tableRowFormat"] = pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableRowFormat
 	abcd["tableNoPrimaryKey"] = pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableNoPrimaryKey
 	abcd["tableForeign"] = pub.InspectionResult.DatabaseBaselineCheck.TableDesign.TableForeign
 	abcd["tableAutoIncrement"] = pub.InspectionResult.DatabaseBaselineCheck.ColumnDesign.TableAutoIncrement
