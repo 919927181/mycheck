@@ -199,7 +199,7 @@ inspectionConfInput:
     - checkconfiguration: tableProcedureFuncTrigger             #检测存储过程、函数、触发器使用情况(请勿修改)
       checkThreshold: procedure,function,trigger                #判断是否使用存储过程、存储函数、触发器
       subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
-    - checkconfiguration: rowFormat                             #检查表的行格式不是Dynamic的表(请勿修改)
+    - checkconfiguration: tableRowFormat                             #检查表的行格式不是Dynamic的表(请勿修改)
       checkThreshold: Dynamic                                   #是不是Dynamic的表
       subCheckSwitch: true                                      #该检测项的开关，为true则检测该项，为false则不检测该项
 

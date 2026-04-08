@@ -114,7 +114,11 @@
 
    工具使用说明
 
-    [root@lh-2 mycheck-linux-1.0]# ./mycheck -h
+   1. 将工具上传到服务器，并赋予可执行权限
+   # chmod +x ./mycheck
+
+   2. 查看使用帮助
+   # ./mycheck -h
     NAME:
         mycheck - In-depth inspection of MySQL for system guarantee and daily inspection during major festivals
 
@@ -138,10 +142,8 @@
 --------
 ## Examples ##
 
-     1) 执行巡检命令方式一
-     shell> ./mycheck --config mycheck.ymal
-     2）执行巡检命令方式二
-     shell> ./mycheck --config /tmp/mycheck.ymal
+   3. 执行巡检命令
+     # ./mycheck --config mycheck.ymal
     
 -------
 ## Building ##
