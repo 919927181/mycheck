@@ -72,7 +72,7 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckTablesDesign() {
 		tmpCharsetCorrespondingTable[ac] = ad
 	}
 	for ki, vi := range pub.BaselineCanCheck {
-		if strings.EqualFold(ki, "tableCharset") || strings.EqualFold(ki, "tableEngine") {
+		if strings.EqualFold(ki, "tableCharset") || strings.EqualFold(ki, "tableEngine") || strings.EqualFold(ki, "tableRowFormat") {
 			for i := range pub.InformationSchemaTablesData {
 				ist := pub.InformationSchemaTablesData[i]
 				var d = make(map[string]string)
@@ -121,9 +121,9 @@ func (baselineCheck *DatabaseBaselineCheckStruct) BaselineCheckTablesDesign() {
 				}
 
 				//检查表的行格式不是Dynamic的表
-				if strings.EqualFold(ki, "rowFormat") {
+				if strings.EqualFold(ki, "tableRowFormat") {
 					m := newMap(d)
-					m["checkType"] = "rowFormat"
+					m["checkType"] = "tableRowFormat"
 					if pub.InformationSchemaTablesData[i]["ROW_FORMAT"] != nil && !strings.EqualFold(pub.InformationSchemaTablesData[i]["ROW_FORMAT"].(string), "Dynamic") {
 						m["checkStatus"] = "abnormal"
 						m["threshold"] = fmt.Sprintf("非%s", vi)
